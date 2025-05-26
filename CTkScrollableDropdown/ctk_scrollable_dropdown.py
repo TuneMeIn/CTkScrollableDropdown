@@ -5,7 +5,6 @@ Author: Akash Bora
 
 import customtkinter
 import sys
-import time
 import difflib
 
 class CTkScrollableDropdown(customtkinter.CTkToplevel):
