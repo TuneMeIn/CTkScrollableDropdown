@@ -11,7 +11,7 @@ import difflib
 class CTkScrollableDropdown(customtkinter.CTkToplevel):
     
     def __init__(self, attach, x=None, y=None, button_color=None, height: int = 200, width: int = None,
-                 fg_color=None, button_height: int = 20, justify="center", scrollbar_button_color=None,
+                 fg_color=None, bg_color=None, button_height: int = 20, justify="center", scrollbar_button_color=None,
                  scrollbar=True, scrollbar_button_hover_color=None, frame_border_width=2, values=[],
                  command=None, image_values=[], alpha: float = 0.97, frame_corner_radius=20, double_click=False,
                  resize=True, frame_border_color=None, text_color=None, autocomplete=False, 
@@ -29,9 +29,12 @@ class CTkScrollableDropdown(customtkinter.CTkToplevel):
         self.disable = True
         self.update()
         
+        # Fix for background colour clipping through corners of frame
+        self.bg_color = self._apply_appearance_mode(self._fg_color) if bg_color is None else bg_color
+
         if sys.platform.startswith("win"):
             self.after(100, lambda: self.overrideredirect(True))
-            self.transparent_color = self._apply_appearance_mode(self._fg_color)
+            self.transparent_color = self.bg_color
             self.attributes("-transparentcolor", self.transparent_color)
         elif sys.platform.startswith("darwin"):
             self.overrideredirect(True)
@@ -40,7 +43,7 @@ class CTkScrollableDropdown(customtkinter.CTkToplevel):
             self.focus_something = True
         else:
             self.overrideredirect(True)
-            self.transparent_color = '#000001'
+            self.transparent_color = frame_border_color
             self.corner = 0
             self.padding = 18
             self.withdraw()
@@ -168,7 +171,6 @@ class CTkScrollableDropdown(customtkinter.CTkToplevel):
                 break
             self.attributes("-alpha", i/100)
             self.update()
-            time.sleep(1/100)
             
     def fade_in(self):
         for i in range(0,100,10):
@@ -176,7 +178,6 @@ class CTkScrollableDropdown(customtkinter.CTkToplevel):
                 break
             self.attributes("-alpha", i/100)
             self.update()
-            time.sleep(1/100)
             
     def _init_buttons(self, **button_kwargs):
         self.i = 0
@@ -228,8 +229,16 @@ class CTkScrollableDropdown(customtkinter.CTkToplevel):
             self.event_generate("<<Opened>>")      
             self.focus()
             self.hide = False
+
+            # Reset dropdown to show all options regardless of entry text
+            for key in self.widgets.keys():
+                self.widgets[key].pack(fill="x", pady=2, padx=(self.padding, 0))
+            self.no_match.pack_forget()
+            self.button_num = len(self.values)
+            
             self.place_dropdown()
-            self._deiconify()  
+            self._deiconify()
+            
             if self.focus_something:
                 self.dummy_entry.pack()
                 self.dummy_entry.focus_set()
@@ -265,9 +274,10 @@ class CTkScrollableDropdown(customtkinter.CTkToplevel):
                 else:
                     self.widgets[key].pack(fill="x", pady=2, padx=(self.padding, 0))
                     i+=1
-                    
+            self.no_match.pack_forget()     
             if i==1:
-                self.no_match.pack(fill="x", pady=2, padx=(self.padding, 0))
+                self.withdraw()
+                self.hide = True
             else:
                 self.no_match.pack_forget()
             self.button_num = i
