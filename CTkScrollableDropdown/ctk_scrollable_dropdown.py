@@ -46,6 +46,7 @@ class CTkScrollableDropdown(customtkinter.CTkToplevel):
             self.corner = 0
             self.padding = 18
             self.withdraw()
+            self.hide = True  # 
 
         self.hide = True
         self.attach.bind('<Configure>', lambda e: self._withdraw() if not self.disable else None, add="+")
@@ -149,7 +150,8 @@ class CTkScrollableDropdown(customtkinter.CTkToplevel):
         self.live_update(self.attach._entry.get())
         # Close dropdown if no text remains in the combobox entry section.
         if self.attach._entry.get() == "":
-            self.withdraw()       
+            self.withdraw()
+            self.hide = True  # Fix for an issue where the dropdown would close, but two clicks were required to open it again.   
     
     def bind_autocomplete(self):
         def appear(x):
@@ -223,7 +225,7 @@ class CTkScrollableDropdown(customtkinter.CTkToplevel):
                                            self.x_pos, self.y_pos))
         self.fade_in()
         self.attributes('-alpha', self.alpha)
-        self.attach.focus()
+        #self.attach.focus()
 
     def _iconify(self):
         if self.attach.cget("state")=="disabled": return
@@ -232,10 +234,10 @@ class CTkScrollableDropdown(customtkinter.CTkToplevel):
             self.hide = False
         if self.hide:
             self.event_generate("<<Opened>>")      
-            self.focus()
+            #self.focus()
             self.hide = False
 
-            # Reset dropdown to show all options regardless of entry text.
+            # Reset dropdown to show all options regardless of entry text when the dropdown button is manually pressed.
             for key in self.widgets.keys():
                 self.widgets[key].pack(fill="x", pady=2, padx=(self.padding, 0))
             self.button_num = len(self.values)
