@@ -46,7 +46,6 @@ class CTkScrollableDropdown(customtkinter.CTkToplevel):
             self.corner = 0
             self.padding = 18
             self.withdraw()
-            self.hide = True  # 
 
         self.hide = True
         self.attach.bind('<Configure>', lambda e: self._withdraw() if not self.disable else None, add="+")
@@ -281,7 +280,6 @@ class CTkScrollableDropdown(customtkinter.CTkToplevel):
                 self._deiconify()
                 self.button_num = visible_buttons
                 self.place_dropdown()
-                self.hide = False
             else:
                 self.withdraw()
                 self.hide = True
